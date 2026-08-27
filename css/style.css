@@ -203,6 +203,19 @@ body::before {
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
+.hero-avatar-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+  display: block;
+  background: #122038;
+}
+
+.hero-avatar-photo.fallback {
+  background: var(--bg-card);
+}
+
 .hero-avatar-ring {
   position: absolute;
   inset: 0;
@@ -210,6 +223,7 @@ body::before {
   border: 2px solid;
   opacity: 0.85;
   pointer-events: none;
+  z-index: 1;
 }
 
 .hero-card-row {

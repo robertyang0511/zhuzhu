@@ -1,5 +1,5 @@
 /**
- * 角色头像配置（SVG + Emoji，无版权素材）
+ * 角色头像：优先使用游戏真实截图，缺失时回退 Emoji
  */
 const HERO_AVATARS = {
   sam: { emoji: '👄', color: '#e67e22', label: '山姆' },
@@ -26,22 +26,64 @@ const HERO_AVATARS = {
   'xiao-bu': { emoji: '⚡', color: '#00b894', label: '小布' },
 };
 
+/** 已有真实游戏截图的角色（assets/heroes/{id}.webp） */
+const HERO_IMAGES = {
+  sam: 'assets/heroes/sam.webp',
+  rambo: 'assets/heroes/rambo.webp',
+  kan: 'assets/heroes/kan.webp',
+  butcher: 'assets/heroes/butcher.webp',
+  chiyo: 'assets/heroes/chiyo.webp',
+};
+
 const RARITY_RING = {
   红: '#ff6b6b',
   橙: '#ffb347',
   紫: '#b197fc',
 };
 
-function getHeroAvatar(id, rarity, size) {
+function hasHeroImage(id) {
+  return Boolean(HERO_IMAGES[id]);
+}
+
+function getHeroImagePath(id) {
+  return HERO_IMAGES[id] || null;
+}
+
+function getHeroEmojiAvatar(id, rarity, size) {
   const cfg = HERO_AVATARS[id] || { emoji: '👤', color: '#00d4ff', label: '?' };
   const ring = RARITY_RING[rarity] || '#00d4ff';
   const s = size || 48;
   const fontSize = Math.round(s * 0.45);
-  return `<div class="hero-avatar" style="width:${s}px;height:${s}px;background:linear-gradient(135deg,${cfg.color},${ring}88)" aria-label="${cfg.label}">
+  return `<div class="hero-avatar hero-avatar-emoji-only" style="width:${s}px;height:${s}px;background:linear-gradient(135deg,${cfg.color},${ring}88)" aria-label="${cfg.label}">
     <span class="hero-avatar-emoji" style="font-size:${fontSize}px">${cfg.emoji}</span>
     <span class="hero-avatar-ring" style="border-color:${ring}"></span>
   </div>`;
 }
+
+function getHeroAvatar(id, rarity, size) {
+  const s = size || 48;
+  const ring = RARITY_RING[rarity] || '#00d4ff';
+  const imgPath = getHeroImagePath(id);
+  const cfg = HERO_AVATARS[id] || { label: '?' };
+
+  if (imgPath) {
+    return `<div class="hero-avatar hero-avatar-photo" style="width:${s}px;height:${s}px" aria-label="${cfg.label}">
+      <img src="${imgPath}" alt="${cfg.label}" loading="lazy" width="${s}" height="${s}"
+        onerror="this.style.display='none';this.parentElement.classList.add('fallback');this.parentElement.insertAdjacentHTML('beforeend', window.__heroEmojiFallback('${id}','${rarity}',${s}));" />
+      <span class="hero-avatar-ring" style="border-color:${ring}"></span>
+    </div>`;
+  }
+
+  return getHeroEmojiAvatar(id, rarity, size);
+}
+
+// 图片加载失败时的全局回退（img onerror 调用）
+window.__heroEmojiFallback = function (id, rarity, size) {
+  const cfg = HERO_AVATARS[id] || { emoji: '👤', color: '#00d4ff' };
+  const ring = RARITY_RING[rarity] || '#00d4ff';
+  const fontSize = Math.round(size * 0.45);
+  return `<span class="hero-avatar-emoji" style="font-size:${fontSize}px;background:linear-gradient(135deg,${cfg.color},${ring}88);width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:14px">${cfg.emoji}</span>`;
+};
 
 function getHeroAvatarByName(name, size) {
   const heroes = typeof GAME_DATA !== 'undefined' ? GAME_DATA.heroes : [];
@@ -56,11 +98,15 @@ function getHeroAvatarByName(name, size) {
       小丑: 'butcher', 摩托: 'jason',
       绿魔: 'red-leg', 腿魔: 'red-leg',
       海王: 'emperor', 牢大: 'fighter', Y哥: 'emperor',
+      巫师老侃: 'kan', 老侃: 'kan',
+      机器屠夫: 'butcher', 屠夫: 'butcher',
+      大嘴山姆: 'sam', 山姆: 'sam',
+      兰博: 'rambo',
     };
     for (const [key, id] of Object.entries(aliases)) {
       if (name.includes(key)) return getHeroAvatar(id, '橙', size);
     }
   }
   if (hero) return getHeroAvatar(hero.id, hero.rarity, size);
-  return getHeroAvatar('sam', '橙', size);
+  return getHeroEmojiAvatar('sam', '橙', size);
 }
