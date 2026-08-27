@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="水世界攻略">
+  <meta name="theme-color" content="#0a1628">
+  <meta name="description" content="疯狂水世界全角色攻略 - 阵容推荐、徽章装备、海兽搭配、赛季指南">
+  <title>疯狂水世界攻略</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-title">🌊 疯狂水世界攻略</div>
+    <div class="header-sub">角色 · 阵容 · 赛季 · 海兽 · 徽章装备</div>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="search" id="search-input" placeholder="搜索角色、阵容..." autocomplete="off">
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- 角色图鉴 -->
+    <section id="section-heroes" class="section active">
+      <div class="section-title"><span class="icon">👤</span> 角色图鉴</div>
+      <div class="filter-row" id="hero-filters">
+        <button class="chip active" data-filter="all">全部</button>
+        <button class="chip" data-filter="f2p">0氪可用</button>
+        <button class="chip" data-filter="p2w">氪金核心</button>
+        <button class="chip" data-filter="t0">T0</button>
+        <button class="chip" data-filter="s1">S1</button>
+        <button class="chip" data-filter="s4">S4</button>
+        <button class="chip" data-filter="s6">S6</button>
+        <button class="chip" data-filter="s7">S7</button>
+      </div>
+      <div id="hero-list"></div>
+    </section>
+
+    <!-- 阵容推荐 -->
+    <section id="section-teams" class="section">
+      <div class="section-title"><span class="icon">⚔️</span> 阵容推荐</div>
+      <div class="filter-row" id="team-filters">
+        <button class="chip active" data-filter="f2p">0氪 / 微氪</button>
+        <button class="chip" data-filter="p2w">氪金推荐</button>
+      </div>
+      <div id="team-list"></div>
+    </section>
+
+    <!-- 赛季 & 海兽 -->
+    <section id="section-seasons" class="section">
+      <div class="section-title"><span class="icon">📅</span> 赛季概览</div>
+      <div id="season-list"></div>
+
+      <div class="section-title" style="margin-top:20px"><span class="icon">🐋</span> 各赛季海兽搭配</div>
+      <div id="beast-guide" style="margin-bottom:16px"></div>
+
+      <div class="section-title"><span class="icon">🦀</span> 海兽图鉴</div>
+      <div id="beast-list"></div>
+    </section>
+
+    <!-- 养成指南 -->
+    <section id="section-guide" class="section">
+      <div class="section-title"><span class="icon">📖</span> 词条 & 徽章指南</div>
+      <div id="trait-guide"></div>
+
+      <div class="section-title" style="margin-top:20px"><span class="icon">💡</span> 通用养成技巧</div>
+      <ul class="tips-list" id="tips-list"></ul>
+
+      <div class="card" style="margin-top:16px;cursor:default">
+        <div class="detail-label">属性叠加机制</div>
+        <div class="detail-content" style="margin-top:8px;font-size:0.8125rem;color:var(--text-dim);line-height:1.6">
+          <strong style="color:var(--accent)">乘法叠加</strong>：攻击、生命、技能强度在不同系统（装备/徽章/海兽）间为乘法计算。
+          例：装备10%+徽章10%+海兽10% = 1.1×1.1×1.1 = <strong style="color:var(--primary)">33.1%</strong>，而非30%。
+          <br><br>
+          <strong style="color:var(--accent)">加法叠加</strong>：攻速、暴击、闪避、生命回收等为直接相加。
+          <br><br>
+          <strong style="color:var(--accent)">阵营优先</strong>：海兽词条选择时，阵营词条 &gt; 职业词条 &gt; 个人词条。
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 详情弹窗 -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal" id="modal-body"></div>
+  </div>
+
+  <!-- 底部导航 -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-section="heroes">
+      <span class="nav-icon">👤</span>
+      <span>角色</span>
+    </button>
+    <button class="nav-item" data-section="teams">
+      <span class="nav-icon">⚔️</span>
+      <span>阵容</span>
+    </button>
+    <button class="nav-item" data-section="seasons">
+      <span class="nav-icon">📅</span>
+      <span>赛季</span>
+    </button>
+    <button class="nav-item" data-section="guide">
+      <span class="nav-icon">📖</span>
+      <span>指南</span>
+    </button>
+  </nav>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
