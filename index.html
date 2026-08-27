@@ -17,10 +17,10 @@
 
   <header class="header">
     <div class="header-title">🌊 疯狂水世界攻略</div>
-    <div class="header-sub">角色 · 阵容 · 赛季 · 海兽 · 徽章装备</div>
+    <div class="header-sub">角色 · 阵容 · 赛季 · 基地 · 指南</div>
     <div class="search-box">
       <span class="search-icon">🔍</span>
-      <input type="search" id="search-input" placeholder="搜索角色、阵容..." autocomplete="off">
+      <input type="search" id="search-input" placeholder="搜索角色、阵容、作物..." autocomplete="off">
     </div>
   </header>
 
@@ -45,6 +45,19 @@
     <!-- 阵容推荐 -->
     <section id="section-teams" class="section">
       <div class="section-title"><span class="icon">⚔️</span> 阵容推荐</div>
+      <div class="filter-row" id="season-team-filters">
+        <button class="chip active" data-season="s1">S1</button>
+        <button class="chip" data-season="s2">S2</button>
+        <button class="chip" data-season="s3">S3</button>
+        <button class="chip" data-season="s4">S4</button>
+        <button class="chip" data-season="s5">S5</button>
+        <button class="chip" data-season="s6">S6</button>
+        <button class="chip" data-season="s7">S7</button>
+      </div>
+      <div id="season-team-header"></div>
+      <div id="season-team-list"></div>
+
+      <div class="section-title" style="margin-top:24px"><span class="icon">📋</span> 通用阵容库</div>
       <div class="filter-row" id="team-filters">
         <button class="chip active" data-filter="f2p">0氪 / 微氪</button>
         <button class="chip" data-filter="p2w">氪金推荐</button>
@@ -60,8 +73,18 @@
       <div class="section-title" style="margin-top:20px"><span class="icon">🐋</span> 各赛季海兽搭配</div>
       <div id="beast-guide" style="margin-bottom:16px"></div>
 
-      <div class="section-title"><span class="icon">🦀</span> 海兽图鉴</div>
+      <div class="section-title"><span class="icon">🦀</span> 赛季限定海兽</div>
       <div id="beast-list"></div>
+    </section>
+
+    <!-- 基地：种植 & 生产 & 海兽 -->
+    <section id="section-base" class="section">
+      <div class="filter-row" id="base-filters">
+        <button class="chip active" data-base="planting">🌾 种植</button>
+        <button class="chip" data-base="production">🏭 生产</button>
+        <button class="chip" data-base="seabeast">🐋 海兽</button>
+      </div>
+      <div id="base-content"></div>
     </section>
 
     <!-- 养成指南 -->
@@ -87,12 +110,10 @@
 
   </main>
 
-  <!-- 详情弹窗 -->
   <div class="modal-overlay" id="modal">
     <div class="modal" id="modal-body"></div>
   </div>
 
-  <!-- 底部导航 -->
   <nav class="bottom-nav">
     <button class="nav-item active" data-section="heroes">
       <span class="nav-icon">👤</span>
@@ -106,6 +127,10 @@
       <span class="nav-icon">📅</span>
       <span>赛季</span>
     </button>
+    <button class="nav-item" data-section="base">
+      <span class="nav-icon">🏝️</span>
+      <span>基地</span>
+    </button>
     <button class="nav-item" data-section="guide">
       <span class="nav-icon">📖</span>
       <span>指南</span>
@@ -113,6 +138,7 @@
   </nav>
 
   <script src="js/data.js"></script>
+  <script src="js/avatars.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>
