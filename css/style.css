@@ -36,7 +36,7 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
   overflow-x: hidden;
-  padding-bottom: calc(70px + var(--safe-bottom));
+  padding-bottom: calc(64px + var(--safe-bottom));
 }
 
 /* 海洋背景 */
@@ -183,6 +183,149 @@ body::before {
 
 .chip:active {
   transform: scale(0.96);
+}
+
+/* Hero avatar */
+.hero-avatar {
+  position: relative;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.hero-avatar-emoji {
+  position: relative;
+  z-index: 1;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.hero-avatar-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  border: 2px solid;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.hero-card-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.hero-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.modal-header-left {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+/* Season team banner */
+.season-banner {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.12), rgba(0, 100, 180, 0.08));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.season-banner-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.season-banner-desc {
+  font-size: 0.8125rem;
+  color: var(--text-dim);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.season-banner-beast {
+  font-size: 0.75rem;
+  color: var(--accent);
+  margin-top: 8px;
+}
+
+/* Team heroes with avatars */
+.team-heroes-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.team-hero-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.team-hero-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.team-hero-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.team-hero-role {
+  font-size: 0.6875rem;
+  color: var(--text-dim);
+}
+
+/* Base section */
+.base-intro {
+  font-size: 0.8125rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+  padding: 10px 12px;
+  background: rgba(0, 212, 255, 0.06);
+  border-radius: 8px;
+  border-left: 3px solid var(--primary);
+}
+
+.tips-banner {
+  font-size: 0.75rem;
+  color: var(--accent);
+  padding: 8px 12px;
+  background: rgba(255, 179, 71, 0.08);
+  border-radius: 8px;
+  margin-top: 10px;
+  line-height: 1.4;
+}
+
+.base-card .base-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin: 6px 0;
+  flex-wrap: wrap;
+}
+
+.base-card {
+  cursor: default;
+}
+
+.base-card:active {
+  transform: none;
 }
 
 /* Cards */
@@ -498,14 +641,15 @@ body::before {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 8px 4px;
+  gap: 1px;
+  padding: 6px 2px;
   border: none;
   background: none;
   color: var(--text-dim);
-  font-size: 0.625rem;
+  font-size: 0.5625rem;
   cursor: pointer;
   transition: color 0.2s;
+  min-width: 0;
 }
 
 .nav-item.active {
@@ -513,7 +657,7 @@ body::before {
 }
 
 .nav-icon {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   line-height: 1;
 }
 
