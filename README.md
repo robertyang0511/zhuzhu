@@ -9,19 +9,43 @@
 - **赛季指南**：各赛季特点与海兽搭配方案
 - **养成指南**：词条优先级、徽章系统、属性叠加机制说明
 
+## 手机访问（重要）
+
+`http://localhost:8080` **只能在电脑本机打开**，手机访问 `localhost` 指的是手机自己，无法连到开发电脑。
+
+### 方式一：公网临时链接（立即可用）
+
+Cloud Agent 环境可通过 Cloudflare 隧道访问，手机浏览器直接打开即可。
+
+> 注意：临时链接仅在 Agent 运行期间有效，关闭后会失效。
+
+### 方式二：GitHub Pages（推荐，永久免费）
+
+1. 打开 GitHub 仓库 [robertyang0511/zhuzhu](https://github.com/robertyang0511/zhuzhu)
+2. 进入 **Settings → Pages**
+3. **Build and deployment** 选择 **GitHub Actions**
+4. 保存后，每次 push 到 `main` 会自动部署
+5. 访问地址：`https://robertyang0511.github.io/zhuzhu/`
+
+### 方式三：本地局域网（同一 WiFi）
+
+电脑和手机连同一 WiFi 时：
+
+```bash
+python3 -m http.server 8080 --bind 0.0.0.0
+```
+
+手机浏览器访问 `http://<你电脑的局域网IP>:8080`（如 `http://192.168.1.100:8080`）
+
 ## 本地运行
 
 纯静态页面，无需构建：
 
 ```bash
-# Python
 python3 -m http.server 8080
-
-# 或 Node.js
-npx serve .
 ```
 
-浏览器访问 `http://localhost:8080`
+浏览器访问 `http://localhost:8080`（仅本机）
 
 ## iOS 添加到主屏幕
 
