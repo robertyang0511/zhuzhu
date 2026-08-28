@@ -550,6 +550,25 @@ body::before {
 
 .facility-card {
   position: relative;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0, 212, 255, 0.15);
+}
+
+.base-card:not(.facility-card) {
+  cursor: default;
+}
+
+.base-card:not(.facility-card):active {
+  transform: none;
+  background: var(--bg-card);
+}
+
+.facility-card-hint {
+  margin: -4px 0 8px;
+  font-size: 0.75rem;
+  color: var(--accent);
+  text-align: right;
 }
 
 .facility-view-all {

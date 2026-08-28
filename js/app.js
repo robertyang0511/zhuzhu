@@ -42,6 +42,7 @@
     bindSearch();
     bindModal();
     bindKingkong();
+    bindBaseContent();
     renderHome();
     renderHeroes();
     renderSeasonTeams();
@@ -58,6 +59,47 @@
       const id = item.dataset.id;
       const cfg = KINGKONG_ITEMS.find((k) => k.id === id);
       if (cfg) navigateKingkong(cfg);
+    });
+  }
+
+  /** 基地内容区事件委托（生产工厂卡片/产物行点击） */
+  function bindBaseContent() {
+    document.getElementById('base-content')?.addEventListener('click', (e) => {
+      if (baseFilter !== 'production') return;
+
+      const previewRow = e.target.closest('.product-preview-row');
+      if (previewRow) {
+        e.preventDefault();
+        e.stopPropagation();
+        const { facilityId, productId } = previewRow.dataset;
+        if (facilityId && productId) showProductDetail(facilityId, productId);
+        return;
+      }
+
+      const summaryRow = e.target.closest('.facility-summary-row');
+      if (summaryRow) {
+        e.preventDefault();
+        const facility = getFacilityById(summaryRow.dataset.facilityId);
+        if (facility) showFacilityDetail(facility);
+        return;
+      }
+
+      const facilityCard = e.target.closest('.facility-card');
+      if (facilityCard) {
+        e.preventDefault();
+        const facility = getFacilityById(facilityCard.dataset.facilityId);
+        if (facility) showFacilityDetail(facility);
+      }
+    });
+
+    document.getElementById('base-content')?.addEventListener('keydown', (e) => {
+      if (baseFilter !== 'production') return;
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const facilityCard = e.target.closest('.facility-card');
+      if (!facilityCard) return;
+      e.preventDefault();
+      const facility = getFacilityById(facilityCard.dataset.facilityId);
+      if (facility) showFacilityDetail(facility);
     });
   }
 
@@ -475,29 +517,6 @@
         const fid = row.dataset.facilityId;
         const pid = row.dataset.productId;
         if (fid && pid) showProductDetail(fid, pid);
-      });
-    });
-  }
-
-  function bindProductionClicks(container) {
-    container.querySelectorAll('.facility-card').forEach((card) => {
-      card.addEventListener('click', (e) => {
-        if (e.target.closest('.product-preview-row')) return;
-        const facility = getFacilityById(card.dataset.facilityId);
-        if (facility) showFacilityDetail(facility);
-      });
-    });
-    container.querySelectorAll('.product-preview-row').forEach((row) => {
-      row.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const { facilityId, productId } = row.dataset;
-        if (facilityId && productId) showProductDetail(facilityId, productId);
-      });
-    });
-    container.querySelectorAll('.facility-summary-row').forEach((row) => {
-      row.addEventListener('click', () => {
-        const facility = getFacilityById(row.dataset.facilityId);
-        if (facility) showFacilityDetail(facility);
       });
     });
   }
@@ -954,11 +973,12 @@
             (f) => {
               const productCount = (f.products || []).length;
               return `
-          <div class="card base-card facility-card" data-facility-id="${f.id}">
+          <div class="card base-card facility-card" data-facility-id="${f.id}" role="button" tabindex="0">
             <div class="card-header">
               <span class="card-name">${f.icon || '🏭'} ${f.name}</span>
               <span class="tag tag-faction">${f.category}</span>
             </div>
+            <div class="facility-card-hint">点击查看全部 ${productCount} 种产物 ›</div>
             <div class="base-meta">
               <span>🔓 ${f.unlock || '-'}</span>
               <span>📊 ${f.playerLevel || '-'}</span>
@@ -1011,7 +1031,6 @@
       if (!filtered.length && searchQuery) {
         container.innerHTML += '<div class="empty-state"><p>未找到匹配工厂/产物</p></div>';
       }
-      bindProductionClicks(container);
     } else if (baseFilter === 'tasks') {
       const t = data.tasks;
       if (!t) return;
