@@ -480,13 +480,111 @@
     if (baseFilter === 'planting') {
       const p = data.planting;
       if (!p) return;
-      const cropMatch = !searchQuery || p.crops.some((c) => c.name.includes(searchQuery) || c.use.includes(searchQuery));
+      const cropMatchesSearch = (c) => {
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        const req = c.requirements || {};
+        const texts = [
+          c.name,
+          c.use,
+          c.output,
+          c.tier,
+          ...(c.products || []),
+          ...(c.heroBoost || []).flatMap((h) => [h.stage, h.bonus, ...(h.heroes || [])]),
+          req.seedFactory,
+          req.farm,
+          req.kitchen,
+          req.playerLevel,
+          req.season,
+          req.obtain,
+          req.seedRule,
+        ];
+        return texts.some((t) => t && String(t).toLowerCase().includes(q));
+      };
+      const filteredCrops = p.crops.filter(cropMatchesSearch);
+      const renderHeroBoost = (boosts) =>
+        (boosts || [])
+          .map(
+            (b) => `
+          <div class="crop-hero-row">
+            <span class="crop-hero-stage">${b.stage}</span>
+            <span class="crop-hero-names">${(b.heroes || []).join('、')}</span>
+            <span class="tag tag-t0 crop-hero-bonus">${b.bonus}</span>
+          </div>`
+          )
+          .join('');
+
+      const renderRequirements = (req) => {
+        if (!req) return '';
+        const rows = [
+          req.seedFactory && { k: '选种厂', v: req.seedFactory },
+          req.farm && { k: '农田', v: req.farm },
+          req.playerLevel && { k: '等级', v: req.playerLevel },
+          req.season && { k: '赛季', v: req.season },
+          req.kitchen && { k: '厨房', v: req.kitchen },
+          req.seedRule && { k: '规则', v: req.seedRule },
+          req.obtain && { k: '解锁', v: req.obtain },
+        ].filter(Boolean);
+        return rows
+          .map(
+            (r) => `
+          <div class="crop-req-row">
+            <span class="crop-req-key">${r.k}</span>
+            <span class="crop-req-val">${r.v}</span>
+          </div>`
+          )
+          .join('');
+      };
+
+      const gc = p.globalConditions;
       container.innerHTML = `
         <div class="base-intro">${p.intro}</div>
         <div class="tips-banner">💡 ${p.tips}</div>
-        <div class="section-title" style="margin-top:12px"><span class="icon">🌱</span> 种植作物</div>
-        ${p.crops
-          .filter((c) => !searchQuery || c.name.includes(searchQuery) || c.use.includes(searchQuery))
+        ${p.conditionsNote ? `<div class="conditions-note">${p.conditionsNote}</div>` : ''}
+        ${
+          gc
+            ? `
+        <div class="card base-card delegation-card">
+          <div class="card-header"><span class="card-name">${gc.title}</span></div>
+          ${(gc.buildings || [])
+            .map(
+              (b) => `
+            <div class="crop-req-row">
+              <span class="crop-req-key">${b.name}</span>
+              <span class="crop-req-val">${b.desc}</span>
+            </div>`
+            )
+            .join('')}
+          <div class="detail-label" style="margin-top:10px">种植流程</div>
+          <ol class="plant-steps">${(gc.steps || []).map((s) => `<li>${s}</li>`).join('')}</ol>
+          ${(gc.extras || []).length ? `<div class="detail-label" style="margin-top:8px">补充说明</div>` : ''}
+          ${(gc.extras || []).map((e) => `<p class="card-desc" style="margin-top:4px">· ${e}</p>`).join('')}
+        </div>`
+            : ''
+        }
+        ${
+          p.delegation
+            ? `
+        <div class="card base-card delegation-card">
+          <div class="card-header"><span class="card-name">${p.delegation.title}</span></div>
+          <p class="card-desc">${p.delegation.note}</p>
+          <p class="card-desc" style="margin-top:6px">🌾 ${p.delegation.farmTip}</p>
+          <p class="card-desc" style="margin-top:4px">🏭 ${p.delegation.productionTip}</p>
+          <div class="detail-label" style="margin-top:10px">委任优先英雄</div>
+          ${(p.delegation.topHeroes || [])
+            .map(
+              (h) => `
+            <div class="crop-hero-row">
+              <span class="crop-hero-names">${h.hero}</span>
+              <span class="card-desc" style="margin:0;font-size:0.75rem">${h.note}</span>
+            </div>`
+            )
+            .join('')}
+        </div>`
+            : ''
+        }
+        <div class="section-title" style="margin-top:12px"><span class="icon">🌱</span> 种植作物（${filteredCrops.length}种）</div>
+        ${filteredCrops
           .map(
             (c) => `
           <div class="card base-card">
@@ -494,16 +592,56 @@
               <span class="card-name">${c.name}</span>
               <span class="tag tag-faction">${c.tier}</span>
             </div>
-            <div class="base-meta"><span>⏱ ${c.growTime}</span><span>📦 ${c.output}</span></div>
+            <div class="base-meta">
+              <span>⏱ 成熟 ${c.growTime}</span>
+              ${c.seedTime ? `<span>🌱 种子 ${c.seedTime}</span>` : ''}
+              <span>📦 ${c.output}</span>
+            </div>
+            ${
+              c.requirements
+                ? `<div class="detail-label" style="margin:8px 0 4px">📋 种植条件</div>
+            <div class="crop-req-list">${renderRequirements(c.requirements)}</div>`
+                : ''
+            }
+            ${
+              c.products?.length
+                ? `<div class="detail-label" style="margin:8px 0 4px">厨房产品</div>
+            <div class="trait-priority">${c.products.map((pr) => `<span class="trait-tag">${pr}</span>`).join('')}</div>`
+                : ''
+            }
             <p class="card-desc">${c.use}</p>
+            ${
+              c.heroBoost?.length
+                ? `<div class="detail-label" style="margin:10px 0 6px">⚡ 提效英雄</div>
+            <div class="crop-hero-list">${renderHeroBoost(c.heroBoost)}</div>`
+                : ''
+            }
           </div>`
           )
           .join('')}
+        ${
+          (p.heroBonus || []).length
+            ? `
+        <div class="section-title" style="margin-top:16px"><span class="icon">👤</span> 种植链专属生产英雄</div>
+        ${p.heroBonus
+          .map(
+            (h) => `
+          <div class="card base-card" style="padding:10px 14px">
+            <div class="card-header">
+              <span class="card-name" style="font-size:0.875rem">${h.hero}</span>
+              <span class="tag tag-t0">${h.bonus}</span>
+            </div>
+            <p class="card-desc">${h.skill} · ${h.scope}</p>
+          </div>`
+          )
+          .join('')}`
+            : ''
+        }
         <div class="section-title" style="margin-top:16px"><span class="icon">🏗️</span> 相关建筑</div>
         <div class="trait-priority">${p.buildings.map((b) => `<span class="trait-tag">${b}</span>`).join('')}</div>
         <div class="section-title" style="margin-top:16px"><span class="icon">📤</span> 种子消耗场景</div>
         <div class="trait-priority">${p.seedUses.map((u) => `<span class="trait-tag">${u}</span>`).join('')}</div>`;
-      if (!cropMatch && searchQuery) {
+      if (!filteredCrops.length && searchQuery) {
         container.innerHTML += '<div class="empty-state"><p>未找到匹配作物</p></div>';
       }
     } else if (baseFilter === 'production') {
