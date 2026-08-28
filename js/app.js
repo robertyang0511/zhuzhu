@@ -583,7 +583,40 @@
         </div>`
             : ''
         }
-        <div class="section-title" style="margin-top:12px"><span class="icon">🌱</span> 种植作物（${filteredCrops.length}种）</div>
+        ${
+          !searchQuery && filteredCrops.length
+            ? `
+        <div class="section-title" style="margin-top:12px"><span class="icon">📊</span> 种植条件一览</div>
+        <div class="crop-summary-wrap">
+          <table class="crop-summary-table">
+            <thead>
+              <tr>
+                <th>作物</th>
+                <th>等级</th>
+                <th>选种厂</th>
+                <th>角色级</th>
+                <th>成熟</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredCrops
+                .map(
+                  (c) => `
+                <tr>
+                  <td class="crop-summary-name">${c.name}${c.requirements?.season ? `<span class="crop-summary-tag">${c.requirements.season.replace('赛季起开放', '').replace('赛季', '')}</span>` : ''}</td>
+                  <td>${c.tier}</td>
+                  <td>${c.requirements?.seedFactory?.replace('选种厂 ', '') || '-'}</td>
+                  <td>${c.requirements?.playerLevel?.replace('约', '').replace('（种植农场解锁后）', '') || '-'}</td>
+                  <td>${c.growTime.split('（')[0]}</td>
+                </tr>`
+                )
+                .join('')}
+            </tbody>
+          </table>
+        </div>`
+            : ''
+        }
+        <div class="section-title" style="margin-top:12px"><span class="icon">🌱</span> 作物详情（${filteredCrops.length}种）</div>
         ${filteredCrops
           .map(
             (c) => `
