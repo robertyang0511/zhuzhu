@@ -42,6 +42,7 @@
     bindSearch();
     bindModal();
     bindKingkong();
+    bindBaseContent();
     renderHome();
     renderHeroes();
     renderSeasonTeams();
@@ -58,6 +59,47 @@
       const id = item.dataset.id;
       const cfg = KINGKONG_ITEMS.find((k) => k.id === id);
       if (cfg) navigateKingkong(cfg);
+    });
+  }
+
+  /** 基地内容区事件委托（生产工厂卡片/产物行点击） */
+  function bindBaseContent() {
+    document.getElementById('base-content')?.addEventListener('click', (e) => {
+      if (baseFilter !== 'production') return;
+
+      const previewRow = e.target.closest('.product-preview-row');
+      if (previewRow) {
+        e.preventDefault();
+        e.stopPropagation();
+        const { facilityId, productId } = previewRow.dataset;
+        if (facilityId && productId) showProductDetail(facilityId, productId);
+        return;
+      }
+
+      const summaryRow = e.target.closest('.facility-summary-row');
+      if (summaryRow) {
+        e.preventDefault();
+        const facility = getFacilityById(summaryRow.dataset.facilityId);
+        if (facility) showFacilityDetail(facility);
+        return;
+      }
+
+      const facilityCard = e.target.closest('.facility-card');
+      if (facilityCard) {
+        e.preventDefault();
+        const facility = getFacilityById(facilityCard.dataset.facilityId);
+        if (facility) showFacilityDetail(facility);
+      }
+    });
+
+    document.getElementById('base-content')?.addEventListener('keydown', (e) => {
+      if (baseFilter !== 'production') return;
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const facilityCard = e.target.closest('.facility-card');
+      if (!facilityCard) return;
+      e.preventDefault();
+      const facility = getFacilityById(facilityCard.dataset.facilityId);
+      if (facility) showFacilityDetail(facility);
     });
   }
 
@@ -319,6 +361,164 @@
       <div class="detail-section"><div class="detail-label">升星建议</div><div class="detail-content">${h.starPriority}</div></div>
       <div class="detail-section"><div class="detail-label">实战技巧</div><div class="detail-content">${h.tips}</div></div>
     `);
+  }
+
+  function getFacilityById(id) {
+    return (data.production?.facilities || []).find((f) => f.id === id);
+  }
+
+  function renderProductDetailRows(pr) {
+    const rows = [
+      ['工厂等级', `Lv.${pr.factoryLevel}`],
+      ['解锁条件', pr.unlockCondition || '-'],
+      ['主角等级', pr.playerLevel || '-'],
+      ['原料/输入', pr.input || '-'],
+      ['生产耗时', pr.produceTime || '-'],
+      ['用途', pr.use || '-'],
+    ];
+    if (pr.quality) rows.push(['品质', pr.quality]);
+    if (pr.catchType) rows.push(['钓取方式', pr.catchType]);
+    return rows
+      .map(
+        ([key, val]) => `
+      <div class="crop-req-row">
+        <span class="crop-req-key">${key}</span>
+        <span class="crop-req-val">${val}</span>
+      </div>`
+      )
+      .join('');
+  }
+
+  function showProductDetail(facilityId, productId) {
+    const facility = getFacilityById(facilityId);
+    if (!facility) return;
+    const pr = (facility.products || []).find((p) => p.id === productId);
+    if (!pr) return;
+
+    openModal(`
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div class="facility-modal-icon">${facility.icon || '🏭'}</div>
+          <div>
+            <div class="modal-title">${pr.name}</div>
+            <div class="card-tags" style="margin-top:8px">
+              <span class="tag tag-faction">${facility.name}</span>
+              <span class="tag tag-t0">Lv.${pr.factoryLevel}</span>
+            </div>
+          </div>
+        </div>
+        <button class="modal-close" id="modal-close-inner">×</button>
+      </div>
+      <div class="detail-section">
+        <div class="detail-label">产物详情</div>
+        <div class="crop-req-list">${renderProductDetailRows(pr)}</div>
+      </div>
+      ${
+        facility.heroBoost?.length
+          ? `<div class="detail-section">
+        <div class="detail-label">⚡ 工厂提速</div>
+        <div class="crop-hero-list">
+          ${facility.heroBoost
+            .map(
+              (h) => `
+            <div class="crop-hero-row">
+              <span class="crop-hero-names">${h.hero}</span>
+              <span class="crop-req-val">${h.skill}</span>
+              <span class="tag tag-t0 crop-hero-bonus">${h.bonus}</span>
+            </div>`
+            )
+            .join('')}
+        </div>
+      </div>`
+          : ''
+      }
+      <button class="modal-back-btn" type="button" data-facility-id="${facility.id}">← 返回 ${facility.name} 产物列表</button>
+    `);
+    document.querySelector('.modal-back-btn')?.addEventListener('click', () => showFacilityDetail(facility));
+  }
+
+  function showFacilityDetail(facility) {
+    const products = facility.products || [];
+    const previewCount = products.length;
+
+    openModal(`
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div class="facility-modal-icon">${facility.icon || '🏭'}</div>
+          <div>
+            <div class="modal-title">${facility.name}</div>
+            <div class="card-tags" style="margin-top:8px">
+              <span class="tag tag-faction">${facility.category}</span>
+              <span class="tag tag-t0">${previewCount}种产物</span>
+            </div>
+          </div>
+        </div>
+        <button class="modal-close" id="modal-close-inner">×</button>
+      </div>
+      <div class="base-meta" style="margin-bottom:12px">
+        <span>🔓 ${facility.unlock || '-'}</span>
+        <span>📊 ${facility.playerLevel || '-'}</span>
+      </div>
+      ${
+        facility.upgrade
+          ? `<div class="detail-section">
+        <div class="detail-label">⬆️ 升级条件</div>
+        <div class="crop-req-list">
+          <div class="crop-req-row"><span class="crop-req-key">消耗</span><span class="crop-req-val">${facility.upgrade.need}</span></div>
+          <div class="crop-req-row"><span class="crop-req-key">说明</span><span class="crop-req-val">${facility.upgrade.note}</span></div>
+        </div>
+      </div>`
+          : ''
+      }
+      <div class="detail-section">
+        <div class="detail-label">📦 全部产物（${previewCount}种，点击查看详情）</div>
+        <div class="product-detail-table-wrap">
+          <table class="product-detail-table">
+            <thead>
+              <tr><th>等级</th><th>产物</th><th>解锁条件</th><th></th></tr>
+            </thead>
+            <tbody>
+              ${products
+                .map(
+                  (pr) => `
+                <tr class="product-detail-row" data-facility-id="${facility.id}" data-product-id="${pr.id || ''}">
+                  <td>Lv.${pr.factoryLevel}</td>
+                  <td class="product-detail-name">${pr.name}</td>
+                  <td class="product-detail-unlock">${pr.unlockCondition || '-'}</td>
+                  <td class="product-detail-arrow">›</td>
+                </tr>`
+                )
+                .join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-label">⚡ 提速英雄</div>
+        <div class="crop-hero-list">
+          ${(facility.heroBoost || [])
+            .map(
+              (h) => `
+            <div class="crop-hero-row">
+              <span class="crop-hero-names">${h.hero}</span>
+              <span class="crop-req-val">${h.skill}</span>
+              <span class="tag tag-t0 crop-hero-bonus">${h.bonus}</span>
+            </div>`
+            )
+            .join('')}
+        </div>
+      </div>
+    `);
+
+    modalBody.querySelectorAll('.product-detail-row').forEach((row) => {
+      row.addEventListener('click', () => {
+        const fid = row.dataset.facilityId;
+        const pid = row.dataset.productId;
+        if (fid && pid) showProductDetail(fid, pid);
+      });
+    });
   }
 
   function renderTeamHeroes(heroes, roles) {
@@ -689,7 +889,14 @@
           f.category,
           f.unlock,
           f.playerLevel,
-          ...(f.products || []).flatMap((pr) => [pr.name, pr.use, pr.input, String(pr.factoryLevel)]),
+          ...(f.products || []).flatMap((pr) => [
+            pr.name,
+            pr.use,
+            pr.input,
+            pr.unlockCondition,
+            pr.produceTime,
+            String(pr.factoryLevel),
+          ]),
           ...(f.heroBoost || []).flatMap((h) => [h.hero, h.skill, h.bonus]),
           f.upgrade?.need,
           f.upgrade?.note,
@@ -699,14 +906,15 @@
       const filtered = facilities.filter(facilityMatch);
       const gc = p.globalConditions;
 
-      const renderProductRows = (products) =>
+      const renderProductPreview = (facility, products) =>
         (products || [])
+          .slice(0, 4)
           .map(
             (pr) => `
-          <div class="crop-req-row">
+          <div class="crop-req-row product-preview-row" data-facility-id="${facility.id}" data-product-id="${pr.id || ''}">
             <span class="crop-req-key">Lv.${pr.factoryLevel}</span>
             <span class="crop-hero-names">${pr.name}</span>
-            <span class="crop-req-val">${pr.input ? `原料：${pr.input} · ` : ''}${pr.use}</span>
+            <span class="crop-req-val product-preview-hint">查看 ›</span>
           </div>`
           )
           .join('');
@@ -745,7 +953,7 @@
                     .map((h) => h.hero)
                     .join('、') || '委任';
                   return `
-                <tr>
+                <tr class="facility-summary-row" data-facility-id="${f.id}">
                   <td class="crop-summary-name">${f.icon || ''} ${f.name}</td>
                   <td>${f.category}</td>
                   <td>${f.playerLevel || f.unlock || '-'}</td>
@@ -762,15 +970,19 @@
         <div class="section-title" style="margin-top:12px"><span class="icon">🏭</span> 工厂详情（${filtered.length}座）</div>
         ${filtered
           .map(
-            (f) => `
-          <div class="card base-card">
+            (f) => {
+              const productCount = (f.products || []).length;
+              return `
+          <div class="card base-card facility-card" data-facility-id="${f.id}" role="button" tabindex="0">
             <div class="card-header">
               <span class="card-name">${f.icon || '🏭'} ${f.name}</span>
               <span class="tag tag-faction">${f.category}</span>
             </div>
+            <div class="facility-card-hint">点击查看全部 ${productCount} 种产物 ›</div>
             <div class="base-meta">
               <span>🔓 ${f.unlock || '-'}</span>
               <span>📊 ${f.playerLevel || '-'}</span>
+              <span>📦 ${productCount}种产物</span>
             </div>
             ${
               f.upgrade
@@ -781,8 +993,9 @@
             </div>`
                 : ''
             }
-            <div class="detail-label" style="margin:10px 0 6px">📦 产物（按工厂等级解锁）</div>
-            <div class="crop-req-list">${renderProductRows(f.products)}</div>
+            <div class="detail-label" style="margin:10px 0 6px">📦 产物预览（共${productCount}种，点击查看全部）</div>
+            <div class="crop-req-list">${renderProductPreview(f, f.products)}</div>
+            ${productCount > 4 ? `<p class="facility-view-all">还有 ${productCount - 4} 种产物，点击查看完整列表 →</p>` : ''}
             <div class="detail-label" style="margin:10px 0 6px">⚡ 提速英雄</div>
             <div class="crop-hero-list">
               ${(f.heroBoost || [])
@@ -796,7 +1009,8 @@
                 )
                 .join('')}
             </div>
-          </div>`
+          </div>`;
+            }
           )
           .join('')}
         <div class="section-title" style="margin-top:16px"><span class="icon">👤</span> 生产加速英雄总表</div>
