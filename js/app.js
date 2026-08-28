@@ -483,6 +483,7 @@
       const cropMatchesSearch = (c) => {
         if (!searchQuery) return true;
         const q = searchQuery.toLowerCase();
+        const req = c.requirements || {};
         const texts = [
           c.name,
           c.use,
@@ -490,8 +491,15 @@
           c.tier,
           ...(c.products || []),
           ...(c.heroBoost || []).flatMap((h) => [h.stage, h.bonus, ...(h.heroes || [])]),
+          req.seedFactory,
+          req.farm,
+          req.kitchen,
+          req.playerLevel,
+          req.season,
+          req.obtain,
+          req.seedRule,
         ];
-        return texts.some((t) => String(t).toLowerCase().includes(q));
+        return texts.some((t) => t && String(t).toLowerCase().includes(q));
       };
       const filteredCrops = p.crops.filter(cropMatchesSearch);
       const renderHeroBoost = (boosts) =>
@@ -506,9 +514,54 @@
           )
           .join('');
 
+      const renderRequirements = (req) => {
+        if (!req) return '';
+        const rows = [
+          req.seedFactory && { k: '选种厂', v: req.seedFactory },
+          req.farm && { k: '农田', v: req.farm },
+          req.playerLevel && { k: '等级', v: req.playerLevel },
+          req.season && { k: '赛季', v: req.season },
+          req.kitchen && { k: '厨房', v: req.kitchen },
+          req.seedRule && { k: '规则', v: req.seedRule },
+          req.obtain && { k: '解锁', v: req.obtain },
+        ].filter(Boolean);
+        return rows
+          .map(
+            (r) => `
+          <div class="crop-req-row">
+            <span class="crop-req-key">${r.k}</span>
+            <span class="crop-req-val">${r.v}</span>
+          </div>`
+          )
+          .join('');
+      };
+
+      const gc = p.globalConditions;
       container.innerHTML = `
         <div class="base-intro">${p.intro}</div>
         <div class="tips-banner">💡 ${p.tips}</div>
+        ${p.conditionsNote ? `<div class="conditions-note">${p.conditionsNote}</div>` : ''}
+        ${
+          gc
+            ? `
+        <div class="card base-card delegation-card">
+          <div class="card-header"><span class="card-name">${gc.title}</span></div>
+          ${(gc.buildings || [])
+            .map(
+              (b) => `
+            <div class="crop-req-row">
+              <span class="crop-req-key">${b.name}</span>
+              <span class="crop-req-val">${b.desc}</span>
+            </div>`
+            )
+            .join('')}
+          <div class="detail-label" style="margin-top:10px">种植流程</div>
+          <ol class="plant-steps">${(gc.steps || []).map((s) => `<li>${s}</li>`).join('')}</ol>
+          ${(gc.extras || []).length ? `<div class="detail-label" style="margin-top:8px">补充说明</div>` : ''}
+          ${(gc.extras || []).map((e) => `<p class="card-desc" style="margin-top:4px">· ${e}</p>`).join('')}
+        </div>`
+            : ''
+        }
         ${
           p.delegation
             ? `
@@ -542,8 +595,14 @@
             <div class="base-meta">
               <span>⏱ 成熟 ${c.growTime}</span>
               ${c.seedTime ? `<span>🌱 种子 ${c.seedTime}</span>` : ''}
+              <span>📦 ${c.output}</span>
             </div>
-            ${c.unlock ? `<div class="base-meta"><span>🔓 ${c.unlock}</span><span>📦 产出 ${c.output}</span></div>` : `<div class="base-meta"><span>📦 ${c.output}</span></div>`}
+            ${
+              c.requirements
+                ? `<div class="detail-label" style="margin:8px 0 4px">📋 种植条件</div>
+            <div class="crop-req-list">${renderRequirements(c.requirements)}</div>`
+                : ''
+            }
             ${
               c.products?.length
                 ? `<div class="detail-label" style="margin:8px 0 4px">厨房产品</div>

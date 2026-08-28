@@ -453,6 +453,50 @@ body::before {
   padding: 2px 6px;
 }
 
+.conditions-note {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin: 8px 0 4px;
+  line-height: 1.5;
+}
+
+.crop-req-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.crop-req-row {
+  display: flex;
+  gap: 8px;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.crop-req-key {
+  flex-shrink: 0;
+  min-width: 2.75rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.crop-req-val {
+  color: var(--text-dim);
+}
+
+.plant-steps {
+  margin: 6px 0 0;
+  padding-left: 1.25rem;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  line-height: 1.55;
+}
+
+.plant-steps li {
+  margin-bottom: 4px;
+}
+
 /* Cards */
 .card {
   background: var(--bg-card);
