@@ -131,7 +131,12 @@ const PRODUCTION_PRODUCT_DETAILS = {
 
 /** 将详细产物合并进 GAME_DATA */
 function mergeProductionProductDetails() {
-  const gameData = typeof GAME_DATA !== 'undefined' ? GAME_DATA : window.GAME_DATA;
+  const gameData =
+    typeof GAME_DATA !== 'undefined'
+      ? GAME_DATA
+      : typeof window !== 'undefined'
+        ? window.GAME_DATA
+        : null;
   const facilities = gameData?.production?.facilities;
   if (!facilities) return;
   facilities.forEach((fac) => {
