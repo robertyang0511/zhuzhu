@@ -17,7 +17,7 @@
 
   <header class="header">
     <div class="header-title">🌊 疯狂水世界攻略</div>
-    <div class="header-sub">角色 · 阵容 · 赛季 · 基地 · 指南</div>
+    <div class="header-sub">首页 · 角色 · 阵容 · 基地 · 赛季</div>
     <div class="search-box">
       <span class="search-icon">🔍</span>
       <input type="search" id="search-input" placeholder="搜索角色、阵容、作物..." autocomplete="off">
@@ -26,8 +26,21 @@
 
   <main class="main">
 
+    <!-- 首页金刚区 -->
+    <section id="section-home" class="section active">
+      <div class="home-banner">
+        <div class="home-banner-title">海上末日生存攻略</div>
+        <div class="home-banner-desc">角色养成 · 阵容搭配 · 基地生产 · 赛季指南</div>
+      </div>
+      <div class="kingkong-grid" id="kingkong-grid"></div>
+      <div class="home-quick">
+        <div class="section-title"><span class="icon">🔥</span> 今日提醒</div>
+        <ul class="tips-list" id="home-tips"></ul>
+      </div>
+    </section>
+
     <!-- 角色图鉴 -->
-    <section id="section-heroes" class="section active">
+    <section id="section-heroes" class="section">
       <div class="section-title"><span class="icon">👤</span> 角色图鉴</div>
       <div class="filter-row" id="hero-filters">
         <button class="chip active" data-filter="all">全部</button>
@@ -82,6 +95,7 @@
       <div class="filter-row" id="base-filters">
         <button class="chip active" data-base="planting">🌾 种植</button>
         <button class="chip" data-base="production">🏭 生产</button>
+        <button class="chip" data-base="tasks">📋 任务</button>
         <button class="chip" data-base="seabeast">🐋 海兽</button>
       </div>
       <div id="base-content"></div>
@@ -115,9 +129,9 @@
   </div>
 
   <nav class="bottom-nav">
-    <button class="nav-item active" data-section="heroes">
-      <span class="nav-icon">👤</span>
-      <span>角色</span>
+    <button class="nav-item active" data-section="home">
+      <span class="nav-icon">🏠</span>
+      <span>首页</span>
     </button>
     <button class="nav-item" data-section="teams">
       <span class="nav-icon">⚔️</span>

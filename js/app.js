@@ -7,14 +7,24 @@
 
   const data = typeof GAME_DATA !== 'undefined' ? GAME_DATA : {};
 
-  let currentSection = 'heroes';
+  let currentSection = 'home';
   let heroFilter = 'all';
   let teamFilter = 'f2p';
   let seasonTeamFilter = 's1';
   let baseFilter = 'planting';
   let searchQuery = '';
 
+  const KINGKONG_ITEMS = [
+    { id: 'planting', label: '种植', icon: '🌾', section: 'base', base: 'planting', color: '#51cf66' },
+    { id: 'production', label: '生产', icon: '🏭', section: 'base', base: 'production', color: '#ffb347' },
+    { id: 'tasks', label: '任务', icon: '📋', section: 'base', base: 'tasks', color: '#74b9ff' },
+    { id: 'heroes', label: '角色', icon: '👤', section: 'heroes', color: '#00d4ff' },
+    { id: 'seabeast', label: '海兽', icon: '🐋', section: 'base', base: 'seabeast', color: '#b197fc' },
+    { id: 'teams', label: '阵容', icon: '⚔️', section: 'teams', color: '#ff6b6b' },
+  ];
+
   const sections = {
+    home: document.getElementById('section-home'),
     heroes: document.getElementById('section-heroes'),
     teams: document.getElementById('section-teams'),
     seasons: document.getElementById('section-seasons'),
@@ -31,12 +41,54 @@
     bindFilters();
     bindSearch();
     bindModal();
+    bindKingkong();
+    renderHome();
     renderHeroes();
     renderSeasonTeams();
     renderTeams();
     renderSeasons();
     renderBase();
     renderGuide();
+  }
+
+  function bindKingkong() {
+    document.getElementById('kingkong-grid')?.addEventListener('click', (e) => {
+      const item = e.target.closest('.kingkong-item');
+      if (!item) return;
+      const id = item.dataset.id;
+      const cfg = KINGKONG_ITEMS.find((k) => k.id === id);
+      if (cfg) navigateKingkong(cfg);
+    });
+  }
+
+  function navigateKingkong(cfg) {
+    if (cfg.base) {
+      baseFilter = cfg.base;
+      document.querySelectorAll('#base-filters .chip').forEach((c) => {
+        c.classList.toggle('active', c.dataset.base === cfg.base);
+      });
+    }
+    switchSection(cfg.section);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function renderHome() {
+    const grid = document.getElementById('kingkong-grid');
+    if (grid) {
+      grid.innerHTML = KINGKONG_ITEMS.map(
+        (k) => `
+        <button class="kingkong-item" data-id="${k.id}" type="button" style="--kk-color:${k.color}">
+          <span class="kingkong-icon">${k.icon}</span>
+          <span class="kingkong-label">${k.label}</span>
+        </button>`
+      ).join('');
+    }
+
+    const tips = document.getElementById('home-tips');
+    const taskTips = data.tasks?.tips || data.tips?.slice(0, 3) || [];
+    if (tips) {
+      tips.innerHTML = taskTips.map((t) => `<li>${t}</li>`).join('');
+    }
   }
 
   function bindNav() {
@@ -56,6 +108,7 @@
     const searchable = ['heroes', 'teams', 'base'];
     document.querySelector('.search-box').style.display =
       searchable.includes(name) ? 'block' : 'none';
+    if (name === 'home') renderHome();
     if (name === 'heroes') renderHeroes();
     if (name === 'teams') {
       renderSeasonTeams();
@@ -495,6 +548,42 @@
           </div>`
           )
           .join('')}`;
+    } else if (baseFilter === 'tasks') {
+      const t = data.tasks;
+      if (!t) return;
+      const match = (text) => !searchQuery || text.toLowerCase().includes(searchQuery);
+      container.innerHTML = `
+        <div class="base-intro">${t.intro}</div>
+        <div class="section-title" style="margin-top:12px"><span class="icon">☀️</span> 每日必做</div>
+        ${(t.daily || [])
+          .filter((item) => match(item.name) || match(item.desc))
+          .map(
+            (item) => `
+          <div class="card base-card">
+            <div class="card-header">
+              <span class="card-name">${item.name}</span>
+              <span class="tag ${item.tag === '必做' ? 'tag-f2p' : 'tag-t1'}">${item.tag}</span>
+            </div>
+            <p class="card-desc">${item.desc}</p>
+          </div>`
+          )
+          .join('')}
+        <div class="section-title" style="margin-top:16px"><span class="icon">📆</span> 每周 / 周期</div>
+        ${(t.weekly || [])
+          .filter((item) => match(item.name) || match(item.desc))
+          .map(
+            (item) => `
+          <div class="card base-card">
+            <div class="card-header">
+              <span class="card-name">${item.name}</span>
+              <span class="tag tag-faction">${item.tag}</span>
+            </div>
+            <p class="card-desc">${item.desc}</p>
+          </div>`
+          )
+          .join('')}
+        <div class="section-title" style="margin-top:16px"><span class="icon">💡</span> 任务技巧</div>
+        <ul class="tips-list">${(t.tips || []).map((tip) => `<li>${tip}</li>`).join('')}</ul>`;
     } else if (baseFilter === 'seabeast') {
       const sys = data.seaBeastSystem;
       if (!sys) return;
