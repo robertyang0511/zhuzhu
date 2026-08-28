@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""本地预览服务：始终从项目根目录提供静态文件，兼容 /zhuzhu/ 路径。"""
+"""本地预览服务：支持电脑本机 + 同一 WiFi 下手机访问。"""
 import http.server
 import os
+import socket
 import socketserver
 import sys
 import urllib.parse
@@ -9,6 +10,7 @@ import urllib.parse
 ROOT = os.path.dirname(os.path.abspath(__file__))
 INDEX = os.path.join(ROOT, "index.html")
 PORT = int(os.environ.get("PORT", "8080"))
+HOST = os.environ.get("HOST", "0.0.0.0")
 BASE_PREFIX = "/zhuzhu"
 
 
@@ -46,6 +48,26 @@ class PreviewHandler(http.server.SimpleHTTPRequestHandler):
         sys.stdout.write("%s - %s\n" % (self.address_string(), fmt % args))
 
 
+def get_lan_ips() -> list[str]:
+    ips: set[str] = set()
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("8.8.8.8", 80))
+            ips.add(s.getsockname()[0])
+    except OSError:
+        pass
+
+    try:
+        for info in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET):
+            ip = info[4][0]
+            if not ip.startswith("127."):
+                ips.add(ip)
+    except OSError:
+        pass
+
+    return sorted(ips)
+
+
 def main() -> None:
     if not os.path.isfile(INDEX):
         print("")
@@ -57,28 +79,34 @@ def main() -> None:
         sys.exit(1)
 
     os.chdir(ROOT)
-    urls = [
-        f"http://127.0.0.1:{PORT}/",
-        f"http://127.0.0.1:{PORT}/index.html",
-        f"http://127.0.0.1:{PORT}{BASE_PREFIX}/",
-    ]
+    lan_ips = get_lan_ips()
 
     print("")
     print("============================================")
     print(" 疯狂水世界攻略 - 本地预览")
     print("============================================")
     print(f"  目录: {ROOT}")
-    print("  用浏览器打开（任选其一）：")
-    for url in urls:
-        print(f"    → {url}")
     print("")
-    print("  ⚠️  本地不要用 github.io 链接")
+    print("  💻 电脑浏览器打开：")
+    print(f"    → http://127.0.0.1:{PORT}/index.html")
+    print("")
+    print("  📱 手机浏览器打开（需与电脑同一 WiFi）：")
+    if lan_ips:
+        for ip in lan_ips:
+            print(f"    → http://{ip}:{PORT}/index.html")
+    else:
+        print("    → 未能自动检测 IP，请在电脑终端运行：")
+        print("       Mac: ipconfig getifaddr en0")
+        print("       Win: ipconfig  （找 IPv4 地址）")
+        print(f"       然后手机访问: http://你的IP:{PORT}/index.html")
+    print("")
+    print("  ⚠️  手机不能用 127.0.0.1 或 localhost")
     print("  ⚠️  请保持此窗口不要关闭")
     print("  按 Ctrl+C 停止")
     print("============================================")
     print("")
 
-    with socketserver.TCPServer(("127.0.0.1", PORT), PreviewHandler) as httpd:
+    with socketserver.TCPServer((HOST, PORT), PreviewHandler) as httpd:
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
