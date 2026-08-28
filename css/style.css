@@ -548,6 +548,131 @@ body::before {
   vertical-align: middle;
 }
 
+.facility-card {
+  position: relative;
+}
+
+.facility-view-all {
+  margin: 6px 0 0;
+  font-size: 0.75rem;
+  color: var(--accent);
+  text-align: right;
+}
+
+.product-preview-row {
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.product-preview-row:active {
+  background: rgba(0, 212, 255, 0.08);
+}
+
+.product-preview-hint {
+  color: var(--accent) !important;
+  white-space: nowrap;
+  font-size: 0.6875rem !important;
+}
+
+.facility-summary-row {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.facility-summary-row:active {
+  background: rgba(0, 212, 255, 0.06);
+}
+
+.facility-modal-icon {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  background: rgba(0, 212, 255, 0.1);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.product-detail-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-top: 8px;
+}
+
+.product-detail-table {
+  width: 100%;
+  min-width: 320px;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.product-detail-table th,
+.product-detail-table td {
+  padding: 10px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.product-detail-table th {
+  color: var(--accent);
+  font-weight: 600;
+  background: rgba(0, 212, 255, 0.06);
+  white-space: nowrap;
+}
+
+.product-detail-table tr:last-child td {
+  border-bottom: none;
+}
+
+.product-detail-row {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.product-detail-row:active {
+  background: rgba(0, 212, 255, 0.08);
+}
+
+.product-detail-name {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.product-detail-unlock {
+  color: var(--text-dim);
+  font-size: 0.6875rem;
+  max-width: 140px;
+}
+
+.product-detail-arrow {
+  color: var(--accent);
+  font-size: 1rem;
+  text-align: right;
+  width: 24px;
+}
+
+.modal-back-btn {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  color: var(--accent);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.modal-back-btn:active {
+  background: rgba(0, 212, 255, 0.08);
+}
+
 /* Cards */
 .card {
   background: var(--bg-card);
