@@ -680,45 +680,143 @@
     } else if (baseFilter === 'production') {
       const p = data.production;
       if (!p) return;
+      const facilities = p.facilities || [];
+      const facilityMatch = (f) => {
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        const texts = [
+          f.name,
+          f.category,
+          f.unlock,
+          f.playerLevel,
+          ...(f.products || []).flatMap((pr) => [pr.name, pr.use, pr.input, String(pr.factoryLevel)]),
+          ...(f.heroBoost || []).flatMap((h) => [h.hero, h.skill, h.bonus]),
+          f.upgrade?.need,
+          f.upgrade?.note,
+        ];
+        return texts.some((t) => t && String(t).toLowerCase().includes(q));
+      };
+      const filtered = facilities.filter(facilityMatch);
+      const gc = p.globalConditions;
+
+      const renderProductRows = (products) =>
+        (products || [])
+          .map(
+            (pr) => `
+          <div class="crop-req-row">
+            <span class="crop-req-key">Lv.${pr.factoryLevel}</span>
+            <span class="crop-hero-names">${pr.name}</span>
+            <span class="crop-req-val">${pr.input ? `原料：${pr.input} · ` : ''}${pr.use}</span>
+          </div>`
+          )
+          .join('');
+
       container.innerHTML = `
         <div class="base-intro">${p.intro}</div>
         <div class="tips-banner">💡 ${p.tips}</div>
-        ${(p.categories || [])
+        ${p.conditionsNote ? `<div class="conditions-note">${p.conditionsNote}</div>` : ''}
+        ${
+          gc
+            ? `
+        <div class="card base-card delegation-card">
+          <div class="card-header"><span class="card-name">${gc.title}</span></div>
+          <div class="detail-label" style="margin-top:4px">升级消耗</div>
+          ${(gc.upgradeCost || []).map((c) => `<p class="card-desc" style="margin-top:4px">· ${c}</p>`).join('')}
+          <div class="detail-label" style="margin-top:10px">蓝图获取</div>
+          ${(gc.blueprintSources || []).map((s) => `<p class="card-desc" style="margin-top:4px">· ${s}</p>`).join('')}
+          <div class="detail-label" style="margin-top:10px">建筑规则</div>
+          ${(gc.buildingRules || []).map((r) => `<p class="card-desc" style="margin-top:4px">· ${r}</p>`).join('')}
+          ${gc.delegation ? `<p class="card-desc" style="margin-top:8px">⚡ ${gc.delegation}</p>` : ''}
+        </div>`
+            : ''
+        }
+        ${
+          !searchQuery && filtered.length
+            ? `
+        <div class="section-title" style="margin-top:12px"><span class="icon">📊</span> 产物解锁一览</div>
+        <div class="crop-summary-wrap">
+          <table class="crop-summary-table">
+            <thead><tr><th>工厂</th><th>类型</th><th>解锁</th><th>产物数</th><th>提速英雄</th></tr></thead>
+            <tbody>
+              ${filtered
+                .map((f) => {
+                  const heroes = (f.heroBoost || [])
+                    .filter((h) => h.hero && h.hero !== '-')
+                    .map((h) => h.hero)
+                    .join('、') || '委任';
+                  return `
+                <tr>
+                  <td class="crop-summary-name">${f.icon || ''} ${f.name}</td>
+                  <td>${f.category}</td>
+                  <td>${f.playerLevel || f.unlock || '-'}</td>
+                  <td>${(f.products || []).length}种</td>
+                  <td>${heroes}</td>
+                </tr>`;
+                })
+                .join('')}
+            </tbody>
+          </table>
+        </div>`
+            : ''
+        }
+        <div class="section-title" style="margin-top:12px"><span class="icon">🏭</span> 工厂详情（${filtered.length}座）</div>
+        ${filtered
           .map(
-            (cat) => `
-          <div class="section-title" style="margin-top:16px"><span class="icon">${cat.icon}</span> ${cat.type}</div>
-          ${cat.buildings
-            .filter(
-              (b) =>
-                !searchQuery ||
-                b.name.includes(searchQuery) ||
-                b.products.some((pr) => pr.includes(searchQuery))
-            )
-            .map(
-              (b) => `
-            <div class="card base-card">
-              <div class="card-header"><span class="card-name">${b.name}</span></div>
-              <div class="detail-label" style="margin:8px 0 4px">产出</div>
-              <div class="trait-priority">${b.products.map((pr) => `<span class="trait-tag">${pr}</span>`).join('')}</div>
-              <p class="card-desc" style="margin-top:8px">用途：${b.use}</p>
+            (f) => `
+          <div class="card base-card">
+            <div class="card-header">
+              <span class="card-name">${f.icon || '🏭'} ${f.name}</span>
+              <span class="tag tag-faction">${f.category}</span>
+            </div>
+            <div class="base-meta">
+              <span>🔓 ${f.unlock || '-'}</span>
+              <span>📊 ${f.playerLevel || '-'}</span>
+            </div>
+            ${
+              f.upgrade
+                ? `<div class="detail-label" style="margin:8px 0 4px">⬆️ 升级条件</div>
+            <div class="crop-req-list">
+              <div class="crop-req-row"><span class="crop-req-key">消耗</span><span class="crop-req-val">${f.upgrade.need}</span></div>
+              <div class="crop-req-row"><span class="crop-req-key">说明</span><span class="crop-req-val">${f.upgrade.note}</span></div>
             </div>`
-            )
-            .join('')}`
+                : ''
+            }
+            <div class="detail-label" style="margin:10px 0 6px">📦 产物（按工厂等级解锁）</div>
+            <div class="crop-req-list">${renderProductRows(f.products)}</div>
+            <div class="detail-label" style="margin:10px 0 6px">⚡ 提速英雄</div>
+            <div class="crop-hero-list">
+              ${(f.heroBoost || [])
+                .map(
+                  (h) => `
+                <div class="crop-hero-row">
+                  <span class="crop-hero-names">${h.hero}</span>
+                  <span class="crop-req-val">${h.skill}</span>
+                  <span class="tag tag-t0 crop-hero-bonus">${h.bonus}</span>
+                </div>`
+                )
+                .join('')}
+            </div>
+          </div>`
           )
           .join('')}
-        <div class="section-title" style="margin-top:16px"><span class="icon">⚡</span> 生产加速英雄</div>
+        <div class="section-title" style="margin-top:16px"><span class="icon">👤</span> 生产加速英雄总表</div>
         ${(p.heroBonus || [])
           .map(
             (h) => `
           <div class="card base-card" style="padding:10px 14px">
             <div class="card-header">
               <span class="card-name" style="font-size:0.875rem">${h.hero}</span>
-              <span class="tag tag-t0">${h.bonus}</span>
+              <span class="tag tag-t0">${h.rarity || ''}</span>
             </div>
-            <p class="card-desc">${h.skill}</p>
+            <div class="trait-priority" style="margin:6px 0">${(h.buildings || []).map((b) => `<span class="trait-tag">${b}</span>`).join('')}</div>
+            <p class="card-desc">${(h.skills || []).join(' · ')}</p>
+            ${h.priority ? `<p class="card-desc" style="margin-top:4px;color:var(--accent)">${h.priority}</p>` : ''}
           </div>`
           )
           .join('')}`;
+      if (!filtered.length && searchQuery) {
+        container.innerHTML += '<div class="empty-state"><p>未找到匹配工厂/产物</p></div>';
+      }
     } else if (baseFilter === 'tasks') {
       const t = data.tasks;
       if (!t) return;
