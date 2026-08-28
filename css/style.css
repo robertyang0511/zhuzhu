@@ -497,6 +497,57 @@ body::before {
   margin-bottom: 4px;
 }
 
+.crop-summary-wrap {
+  overflow-x: auto;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+}
+
+.crop-summary-table {
+  width: 100%;
+  min-width: 420px;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+.crop-summary-table th,
+.crop-summary-table td {
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.crop-summary-table th {
+  color: var(--accent);
+  font-weight: 600;
+  background: rgba(0, 212, 255, 0.06);
+  white-space: nowrap;
+}
+
+.crop-summary-table tr:last-child td {
+  border-bottom: none;
+}
+
+.crop-summary-name {
+  color: var(--primary);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.crop-summary-tag {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 4px;
+  font-size: 0.625rem;
+  border-radius: 4px;
+  background: rgba(255, 107, 107, 0.15);
+  color: #ff6b6b;
+  font-weight: 500;
+  vertical-align: middle;
+}
+
 /* Cards */
 .card {
   background: var(--bg-card);
